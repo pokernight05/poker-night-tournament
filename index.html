@@ -885,7 +885,7 @@
 const GOOGLE_SCRIPT_URL = https://script.google.com/macros/s/AKfycbx1leIlpSPyMMGtdInI0CGs-2LR5KEOiTD0-8OdUYEejkbRwj2oYc4deAFIEthIdNzX0A/exec;
 
 // (EZT NEKED KELL BEÍRNI: Google Sheets publikus URL) - Sima megtekintő link
-const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyDuBowIcfqTGxZj07ByfaflALt37g3s/edit?usp=sharing';
+const GOOGLE_SHEET_URL = https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyDuBowIcfqTGxZj07ByfaflALt37g3s/edit?usp=sharing;
 
         // Validációs regex-ek
         const NAME_REGEX = /^[a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ\s]+$/;
@@ -922,37 +922,34 @@ const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyD
         });
 
         function checkMainCode() {
-            const input = document.getElementById('main-code').value;
-            if (input === MAIN_CODE) {
-                document.getElementById('main-login').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('main-login').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'block';
-                }, 500);
-            } else {
-                document.getElementById('main-error').classList.add('show');
-                setTimeout(() => document.getElementById('main-error').classList.remove('show'), 3000);
-            }
-        }
+    const input = document.getElementById('main-code').value.trim();
+    console.log("Beírt:", input, "| Várt:", MAIN_CODE);
+    if (input === MAIN_CODE) {
+        document.getElementById('main-login').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('main-login').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }, 500);
+    } else {
+        document.getElementById('main-error').classList.add('show');
+        setTimeout(() => document.getElementById('main-error').classList.remove('show'), 3000);
+    }
+}
 
-        function openSeatingLogin() {
-            document.getElementById('seating-login').style.display = 'flex';
-        }
-
-        function checkSeatingCode() {
-            const input = document.getElementById('seating-code').value;
-            if (input === SEATING_CODE) {
-                document.getElementById('seating-login').style.display = 'none';
-                showSection('seating');
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.nav-btn')[3].classList.add('active');
-                // Automatikus betöltés
-                loadFromGoogleSheets();
-            } else {
-                document.getElementById('seating-error').classList.add('show');
-                setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
-            }
-        }
+function checkSeatingCode() {
+    const input = document.getElementById('seating-code').value.trim();
+    console.log("Beírt:", input, "| Várt:", SEATING_CODE);
+    if (input === SEATING_CODE) {
+        document.getElementById('seating-login').style.display = 'none';
+        showSection('seating');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.nav-btn')[3].classList.add('active');
+        loadFromGoogleSheets();
+    } else {
+        document.getElementById('seating-error').classList.add('show');
+        setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
+    }
+}
 
         function backToMain() {
             document.getElementById('seating-login').style.display = 'none';
