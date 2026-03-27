@@ -1,2 +1,809 @@
-# poker-night-tournament
-Poker Night tournament site
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Night</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Login Screens */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 50%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .login-container {
+            background: rgba(20, 0, 0, 0.9);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 2px solid #dc143c;
+            box-shadow: 0 0 40px rgba(220, 20, 60, 0.4);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: #dc143c;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.2rem;
+            background: #0a0a0a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: #dc143c;
+            text-align: center;
+            letter-spacing: 5px;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #dc143c;
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #dc143c, #ff1744);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(220, 20, 60, 0.5);
+        }
+
+        .error-msg {
+            color: #ff4444;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .error-msg.show {
+            opacity: 1;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #1a0000 0%, #0a0a0a 100%);
+        }
+
+        /* Header */
+        header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1.5rem;
+            border-bottom: 2px solid #dc143c;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tournament-title {
+            color: #dc143c;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 2px solid #dc143c;
+            color: #dc143c;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #dc143c;
+            color: #fff;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(20, 0, 0, 0.9);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: #dc143c;
+            border-bottom-color: #dc143c;
+        }
+
+        .nav-btn.locked {
+            position: relative;
+            opacity: 0.6;
+        }
+
+        .nav-btn.locked::after {
+            content: '🔒';
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            animation: fadeIn 0.5s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(40, 0, 0, 0.9), rgba(20, 0, 0, 0.9));
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #dc143c, #ff1744);
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: #dc143c;
+            box-shadow: 0 10px 30px rgba(220, 20, 60, 0.2);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            color: #dc143c;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .card-content {
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: #dc143c;
+            font-weight: bold;
+        }
+
+        /* Seating Generator */
+        .seating-container {
+            background: rgba(20, 0, 0, 0.9);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid #333;
+        }
+
+        .input-section {
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: #dc143c;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        textarea, input[type="number"] {
+            width: 100%;
+            padding: 1rem;
+            background: #0a0a0a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        textarea:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #dc143c;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #dc143c, #ff1744);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: block;
+            margin: 2rem auto;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(220, 20, 60, 0.4);
+        }
+
+        /* Results */
+        .results {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .table {
+            background: linear-gradient(135deg, #2a0a0a, #1a0000);
+            border: 3px solid #8b0000;
+            border-radius: 50%;
+            width: 300px;
+            height: 200px;
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .table-number {
+            position: absolute;
+            top: -15px;
+            background: #dc143c;
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .seats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .seat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 2px solid #dc143c;
+            color: #dc143c;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .table-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 1rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Structure Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #aaa;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        th {
+            color: #dc143c;
+            border-bottom: 2px solid #dc143c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .table {
+                width: 250px;
+                height: 170px;
+            }
+        }
+
+        /* Decorative elements */
+        .card-suits {
+            position: fixed;
+            font-size: 3rem;
+            opacity: 0.05;
+            pointer-events: none;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .suit-1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .suit-2 { top: 20%; right: 15%; animation-delay: 5s; }
+        .suit-3 { bottom: 20%; left: 20%; animation-delay: 10s; }
+        .suit-4 { bottom: 10%; right: 10%; animation-delay: 15s; }
+    </style>
+</head>
+<body>
+    <!-- Decorative Background -->
+    <div class="card-suits suit-1">♠</div>
+    <div class="card-suits suit-2">♥</div>
+    <div class="card-suits suit-3">♦</div>
+    <div class="card-suits suit-4">♣</div>
+
+    <!-- MAIN LOGIN (Code: 4825) -->
+    <div id="main-login" class="login-screen">
+        <div class="login-container">
+            <div class="logo">🃜🃚🃖🃁🂭🂺</div>
+            <h1>Poker Night</h1>
+            <p class="subtitle">Add meg a belépési kódot</p>
+            <input type="text" class="code-input" id="main-code" placeholder="KÓD" maxlength="10">
+            <button class="btn" onclick="checkMainCode()">Belépés</button>
+            <p class="error-msg" id="main-error">Hibás kód!</p>
+        </div>
+    </div>
+
+    <!-- SEATING LOGIN (Code: 482550) -->
+    <div id="seating-login" class="login-screen" style="display: none;">
+        <div class="login-container">
+            <div class="logo">🪑</div>
+            <h1>Ülésrend</h1>
+            <p class="subtitle">Külön kód szükséges az ülésrendhez</p>
+            <input type="text" class="code-input" id="seating-code" placeholder="KÓD" maxlength="10">
+            <button class="btn" onclick="checkSeatingCode()">Belépés</button>
+            <p class="error-msg" id="seating-error">Hibás kód!</p>
+            <p class="hint"></p>
+            <button class="btn" onclick="backToMain()" style="margin-top: 1rem; background: #444;">⬅️ Vissza</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content" class="main-content">
+        <header>
+            <div class="header-content">
+                <div class="tournament-title">♠️ Poker Night ♥️</div>
+                <button class="logout-btn" onclick="logout()">Kilépés</button>
+            </div>
+        </header>
+
+        <nav>
+            <button class="nav-btn active" onclick="showSection('info')">📋 Infók</button>
+            <button class="nav-btn" onclick="showSection('structure')">⏱️ Struktúra</button>
+            <button class="nav-btn locked" onclick="openSeatingLogin()">🪑 Ülésrend</button>
+        </nav>
+
+        <!-- INFO SECTION -->
+        <section id="info" class="section active">
+            <div class="info-grid">
+                
+                <!-- (EZT NEKED KELL BEÍRNI: dátum) -->
+                <div class="info-card">
+                    <div class="card-icon">📅</div>
+                    <div class="card-title">Időpont</div>
+                    <div class="card-content">
+                        <span class="highlight">2026. április 15.</span><br>
+                        Kezdés: 21:00<br>
+                        Érkezés: 20:30-tól
+                    </div>
+                </div>
+
+                <!-- (EZT NEKED KELL BEÍRNI: helyszín) -->
+                <div class="info-card">
+                    <div class="card-icon">📍</div>
+                    <div class="card-title">Helyszín</div>
+                    <div class="card-content">
+                        <span class="highlight">Budapest, XIX. kerület</span><br>
+                        Pontos cím: Szegfű utca 4<br>
+                        Parkolás: Az utcán ingyenes
+                    </div>
+                </div>
+
+                <!-- (EZT NEKED KELL BEÍRNI: buy-in) -->
+                <div class="info-card">
+                    <div class="card-icon">💰</div>
+                    <div class="card-title">Buy-in</div>
+                    <div class="card-content">
+                        <span class="highlight">10.000 Ft</span><br>
+                        Re-entry: Igen(1) (első 4 szintig)<br>
+                        Kezdő zseton: 100.000
+                    </div>
+                </div>
+
+                <!-- (EZT NEKED KELL BEÍRNI: létszám) -->
+                <div class="info-card">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Létszám</div>
+                    <div class="card-content">
+                        <span class="highlight">Max 30 fő</span><br>
+                        Asztalok: 3 db (Max 7 fős)<br>
+                        Dealerek: Igen, önkezelés nincs
+                    </div>
+                </div>
+
+                <!-- (EZT NEKED KELL BEÍRNI: ellátás) -->
+                <div class="info-card">
+                    <div class="card-icon">🍕</div>
+                    <div class="card-title">Ellátás</div>
+                    <div class="card-content">
+                        <span class="highlight">Pizza & Üdítő</span><br>
+                        Szünet: 22:30 körül<br>
+                        Ital: Alkoholmentes üdítők
+                    </div>
+                </div>
+
+                <!-- (EZT NEKED KELL BEÍRNI: díjazás) -->
+                <div class="info-card">
+                    <div class="card-icon">🏆</div>
+                    <div class="card-title">Díjazás</div>
+                    <div class="card-content">
+                        <span class="highlight">Top 3 díjazott</span><br>
+                        1. hely: 50%<br>
+                        2. hely: 30%<br>
+                        3. hely: 20%
+                    </div>
+                </div>
+            </div>
+
+            <div class="seating-container">
+                <h2 style="color: #dc143c; margin-bottom: 1rem; text-align: center;">Fontos Szabályok</h2>
+                <!-- (EZT NEKED KELL BEÍRNI: szabályok) -->
+                <ul style="color: #aaa; line-height: 2; padding-left: 2rem;">
+<li>Barátságos légkör, de komoly játék!</li>
+                    <li>Érkezz időben, késés esetén zsetonokat veszíthetsz</li>
+                    <li>Mobiltelefon használata az asztalnál tiltott (kivéve szünet)</li>
+                    <li>String betek szigorúan tilosak</li>
+                    <li>Döntetlen szín esetén a magasabb lap dönt</li>
+                    <li>A zsetonokat az asztalon kell tárolni, az elötted lévő játékos döntését meg kell várni!</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- STRUCTURE SECTION -->
+        <section id="structure" class="section">
+            <div class="seating-container">
+                <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">⏱️ Verseny Struktúra</h2>
+                
+                <!-- (EZT NEKED KELL BEÍRNI: blind struktúra - ha máshogy akarod) -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Szint</th>
+                            <th>Small Blind</th>
+                            <th>Big Blind</th>
+                            <th>Ante</th>
+                            <th>Idő</th>
+                        </tr>
+                    </thead>
+                    <tbody id="structure-body"></tbody>
+                </table>
+
+                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(220, 20, 60, 0.1); border-radius: 10px; border-left: 4px solid #dc143c;">
+                    <h3 style="color: #dc143c; margin-bottom: 1rem;">Megjegyzések:</h3>
+                    <!-- (EZT NEKED KELL BEÍRNI: egyéb megjegyzések) -->
+                    <ul style="color: #aaa; line-height: 1.8; padding-left: 1.5rem;">
+                        <li>Szintek hossza: <span class="highlight">20 perc</span></li>
+                        <li>Szünet az 5. szint után (kb. 22:30)</li>
+                        <li>Re-entry az első 4 szintig lehetséges</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEATING SECTION -->
+        <section id="seating" class="section">
+            <div class="seating-container">
+                <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">🎲 Random Ülésrend Generátor</h2>
+                
+                <div class="input-section">
+                    <div class="input-group">
+                        <label for="players">Játékosok nevei (soronként egy név):</label>
+                        <textarea id="players" placeholder="Példa:
+Gábor
+Attila
+Zsolt
+Máté
+..."></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="table-size">Egy asztalnál ülők száma:</label>
+                        <input type="number" id="table-size" value="8" min="2" max="10">
+                    </div>
+
+                    <button class="generate-btn" onclick="generateSeating()">Ülésrend Generálása</button>
+                </div>
+
+                <div id="results" class="results">
+                    <div class="stats" id="stats"></div>
+                    <div class="table-layout" id="tables"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // (EZT NEKED KELL BEÍRNI: belépési kódok)
+        const MAIN_CODE = '4825';
+        const SEATING_CODE = '482550';
+
+        function checkMainCode() {
+            const input = document.getElementById('main-code').value;
+            if (input === MAIN_CODE) {
+                document.getElementById('main-login').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('main-login').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                }, 500);
+            } else {
+                document.getElementById('main-error').classList.add('show');
+                setTimeout(() => document.getElementById('main-error').classList.remove('show'), 3000);
+            }
+        }
+
+        function openSeatingLogin() {
+            document.getElementById('seating-login').style.display = 'flex';
+        }
+
+        function checkSeatingCode() {
+            const input = document.getElementById('seating-code').value;
+            if (input === SEATING_CODE) {
+                document.getElementById('seating-login').style.display = 'none';
+                showSection('seating');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.nav-btn')[2].classList.add('active');
+            } else {
+                document.getElementById('seating-error').classList.add('show');
+                setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
+            }
+        }
+
+        function backToMain() {
+            document.getElementById('seating-login').style.display = 'none';
+        }
+
+        function logout() {
+            location.reload();
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function generateSeating() {
+            const playersText = document.getElementById('players').value.trim();
+            const tableSize = parseInt(document.getElementById('table-size').value);
+            
+            if (!playersText) {
+                alert('Adj meg legalább egy játékost!');
+                return;
+            }
+
+            const players = playersText.split('\n').filter(p => p.trim() !== '');
+            
+            if (players.length < 2) {
+                alert('Legalább 2 játékos szükséges!');
+                return;
+            }
+
+            const shuffled = [...players].sort(() => Math.random() - 0.5);
+            const tables = [];
+            for (let i = 0; i < shuffled.length; i += tableSize) {
+                tables.push(shuffled.slice(i, i + tableSize));
+            }
+
+            const resultsDiv = document.getElementById('results');
+            const tablesDiv = document.getElementById('tables');
+            const statsDiv = document.getElementById('stats');
+            
+            statsDiv.innerHTML = `<span class="highlight">${players.length} játékos</span> | <span class="highlight">${tables.length} asztal</span> | <span class="highlight">${tableSize} fő/asztal</span>`;
+            
+            tablesDiv.innerHTML = tables.map((table, index) => `
+                <div class="table">
+                    <div class="table-number">Asztal ${index + 1}</div>
+                    <div class="seats">
+                        ${table.map(player => `<div class="seat">${player}</div>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            resultsDiv.classList.add('show');
+        }
+
+        // (EZT NEKED KELL BEÍRNI: blind szintek - ha máshogy akarod)
+        function generateStructure() {
+            const levels = [
+                {sb: 100, bb: 100, ante: 0},
+                {sb: 100, bb: 100, ante: 0},
+                {sb: 200, bb: 200, ante: 0},
+                {sb: 200, bb: 300, ante: 0},
+                {sb: 200, bb: 400, ante: 400},
+                {sb: 300, bb: 500, ante: 500},
+                {sb: 500, bb: 1000, ante: 1000},
+                {sb: 1000, bb: 2000, ante: 2000},
+                {sb: 1500, bb: 3000, ante: 3000},
+                {sb: 2000, bb: 4000, ante: 4000},
+                {sb: 2500, bb: 5000, ante: 5000},
+                {sb: 3000, bb: 6000, ante: 6000}
+            ];
+
+            const tbody = document.getElementById('structure-body');
+            tbody.innerHTML = levels.map((level, index) => `
+                <tr style="${index % 2 === 0 ? 'background: rgba(255,255,255,0.02);' : ''}">
+                    <td style="color: ${index === 4 ? '#dc143c' : '#aaa'};">${index + 1}. ${index === 4 ? ' (Szünet)' : ''}</td>
+                    <td>${level.sb}</td>
+                    <td style="color: #dc143c; font-weight: bold;">${level.bb}</td>
+                    <td>${level.ante || '-'}</td>
+                    <td>20 min</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('main-code').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkMainCode();
+        });
+        document.getElementById('seating-code').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkSeatingCode();
+        });
+
+        generateStructure();
+    </script>
+</body>
+</html>
