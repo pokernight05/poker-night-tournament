@@ -676,6 +676,12 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .loading-text {
+            color: #888;
+            text-align: center;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -688,7 +694,7 @@
     <!-- MAIN LOGIN (Code: 4825) -->
     <div id="main-login" class="login-screen">
         <div class="login-container">
-            <div class="logo">🃜 🃚 🃖 🃁 🂭 🂺</div>
+            <div class="logo">🃏</div>
             <h1>Poker Night</h1>
             <p class="subtitle">Add meg a belépési kódot</p>
             <input type="tel" class="code-input" id="main-code" placeholder="KÓD" maxlength="10" inputmode="numeric">
@@ -731,7 +737,6 @@
         <section id="info" class="section active">
             <div class="info-grid">
                 
-                <!-- (EZT NEKED KELL BEÍRNI: dátum) -->
                 <div class="info-card">
                     <div class="card-icon">📅</div>
                     <div class="card-title">Időpont</div>
@@ -742,7 +747,6 @@
                     </div>
                 </div>
 
-                <!-- (EZT NEKED KELL BEÍRNI: helyszín) -->
                 <div class="info-card">
                     <div class="card-icon">📍</div>
                     <div class="card-title">Helyszín</div>
@@ -753,7 +757,6 @@
                     </div>
                 </div>
 
-                <!-- (EZT NEKED KELL BEÍRNI: buy-in) -->
                 <div class="info-card">
                     <div class="card-icon">💰</div>
                     <div class="card-title">Buy-in</div>
@@ -764,7 +767,6 @@
                     </div>
                 </div>
 
-                <!-- (EZT NEKED KELL BEÍRNI: létszám) -->
                 <div class="info-card">
                     <div class="card-icon">👥</div>
                     <div class="card-title">Létszám</div>
@@ -775,7 +777,6 @@
                     </div>
                 </div>
 
-                <!-- (EZT NEKED KELL BEÍRNI: ellátás) -->
                 <div class="info-card">
                     <div class="card-icon">🍕</div>
                     <div class="card-title">Ellátás</div>
@@ -786,7 +787,6 @@
                     </div>
                 </div>
 
-                <!-- (EZT NEKED KELL BEÍRNI: díjazás) -->
                 <div class="info-card">
                     <div class="card-icon">🏆</div>
                     <div class="card-title">Díjazás</div>
@@ -801,7 +801,6 @@
 
             <div class="seating-container">
                 <h2 style="color: #dc143c; margin-bottom: 1rem; text-align: center;">Fontos Szabályok</h2>
-                <!-- (EZT NEKED KELL BEÍRNI: szabályok) -->
                 <ul style="color: #aaa; line-height: 2; padding-left: 2rem;">
                     <li>Barátságos légkör, de komoly játék!</li>
                     <li>Érkezz időben, késés esetén zsetonokat veszíthetsz</li>
@@ -818,29 +817,17 @@
             <div class="form-container">
                 <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">📝 Jelentkezés a Tournament-re</h2>
                 
-                <!-- FormSubmit.co form - email küldés -->
-                <form id="registration-form" action="https://formsubmit.co/bartazsigu10@gmail.com" method="POST">
-                    <!-- FormSubmit beállítások -->
-                    <input type="hidden" name="_subject" value="🃏 Új Poker Night jelentkezés!">
-                    <input type="hidden" name="_template" value="table">
-                    <input type="hidden" name="_captcha" value="false">
-                    <input type="hidden" name="_next" value="javascript:void(0);">
-                    
+                <form id="registration-form" onsubmit="submitRegistration(event)">
                     <div class="form-group">
                         <label for="reg-name">Név *</label>
-                        <input type="text" id="reg-name" name="Név" placeholder="Add meg a neved (csak betűk)" maxlength="50" required>
+                        <input type="text" id="reg-name" placeholder="Add meg a neved (csak betűk)" maxlength="50" required>
                         <p class="input-error" id="name-error">Csak betűket és szóközt használhatsz!</p>
                     </div>
 
                     <div class="form-group">
                         <label for="reg-phone">Telefonszám *</label>
-                        <input type="tel" id="reg-phone" name="Telefonszám" placeholder="Pl: 06301234567 (csak számok)" maxlength="15" required>
+                        <input type="tel" id="reg-phone" placeholder="Pl: 06301234567 (csak számok)" maxlength="15" required>
                         <p class="input-error" id="phone-error">Csak számokat használhatsz!</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reg-email">Email (opcionális)</label>
-                        <input type="text" id="reg-email" name="Email" placeholder="Számítógép használata szükséges a jelentkezéshez !" maxlength="100">
                     </div>
 
                     <button type="submit" class="submit-btn" id="submit-btn">
@@ -849,7 +836,7 @@
                     </button>
                 </form>
 
-                <p class="success-msg" id="reg-success">✅ Sikeres jelentkezés! Az adatokat elküldtük emailben.</p>
+                <p class="success-msg" id="reg-success">✅ Sikeres jelentkezés! Várunk a versenyen!</p>
                 <p class="error-msg" id="reg-error" style="margin-top: 1rem; text-align: center;">❌ Hiba történt, próbáld újra!</p>
             </div>
         </section>
@@ -859,7 +846,6 @@
             <div class="seating-container">
                 <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">⏱️ Verseny Struktúra</h2>
                 
-                <!-- (EZT NEKED KELL BEÍRNI: blind struktúra - ha máshogy akarod) -->
                 <table>
                     <thead>
                         <tr>
@@ -875,7 +861,6 @@
 
                 <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(220, 20, 60, 0.1); border-radius: 10px; border-left: 4px solid #dc143c;">
                     <h3 style="color: #dc143c; margin-bottom: 1rem;">Megjegyzések:</h3>
-                    <!-- (EZT NEKED KELL BEÍRNI: egyéb megjegyzések) -->
                     <ul style="color: #aaa; line-height: 1.8; padding-left: 1.5rem;">
                         <li>Szintek hossza: <span class="highlight">20 perc</span></li>
                         <li>Szünet az 5. szint után (kb. 22:30)</li>
@@ -893,7 +878,7 @@
                 <div class="input-section">
                     <div class="form-group">
                         <label for="players">Játékosok nevei (soronként egy név):</label>
-                        <textarea id="players" placeholder="Itt látod a jelentkezőket, vagy adj meg új neveket..."></textarea>
+                        <textarea id="players" placeholder="Töltsd le a jelentkezőket a Frissítés gombbal..."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -904,14 +889,12 @@
                     <button class="generate-btn" onclick="generateSeating()">Ülésrend Generálása</button>
                 </div>
 
-                <!-- Jelentkezők listája (csak te látod) -->
+                <!-- JSONBin jelentkezők -->
                 <div class="applicants-list" id="applicants-section">
-                    <h3 style="color: #dc143c; margin-bottom: 1rem;">📋 Jelentkezők listája</h3>
+                    <h3 style="color: #dc143c; margin-bottom: 1rem;">📋 Jelentkezők listája (JSONBin)</h3>
+                    <button class="refresh-btn" onclick="loadFromJSONBin()">🔄 Frissítés</button>
                     <div id="applicants-container">
-                        <p style="color: #888; text-align: center;">Még nincs jelentkező</p>
-                    </div>
-                    <div style="margin-top: 1rem;">
-                        <button class="clear-all-btn" onclick="clearAllApplicants()" style="display: none;" id="clear-all-btn">Összes törlése</button>
+                        <p class="loading-text">Kattints a Frissítés gombra a jelentkezők betöltéséhez</p>
                     </div>
                 </div>
 
@@ -924,21 +907,20 @@
     </div>
 
     <script>
-        // (EZT NEKED KELL BEÍRNI: belépési kódok)
+        // Belépési kódok
         const MAIN_CODE = '4825';
         const SEATING_CODE = '482550';
 
-        // Email cím a jelentkezések fogadásához
-        const EMAIL_ADDRESS = 'bartazsigu10@gmail.com';
-
-        // Jelentkezők tárolása (localStorage - csak a te gépeden látszik!)
-        let applicants = JSON.parse(localStorage.getItem('pokerApplicants') || '[]');
+        // JSONBin.io beállítások
+        const JSONBIN_API_KEY = '$2a$10$AKrc7jipOWgkcuisdwl.seTFtoBjqKVXiw8kXoVamsuTZFJzJ27lS';
+        const JSONBIN_BIN_ID = '69c6ebf8b7ec241ddcae8270';
+        const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
         // Validációs regex-ek
         const NAME_REGEX = /^[a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ\s]+$/;
         const PHONE_REGEX = /^[0-9]+$/;
 
-        // Név validálás (csak betűk)
+        // Név validálás
         document.getElementById('reg-name').addEventListener('input', function(e) {
             const value = e.target.value;
             const errorEl = document.getElementById('name-error');
@@ -946,7 +928,6 @@
             if (value && !NAME_REGEX.test(value)) {
                 e.target.classList.add('error');
                 errorEl.classList.add('show');
-                // Érvénytelen karakterek eltávolítása
                 e.target.value = value.replace(/[^a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ\s]/g, '');
             } else {
                 e.target.classList.remove('error');
@@ -954,7 +935,7 @@
             }
         });
 
-        // Telefonszám validálás (csak számok)
+        // Telefonszám validálás
         document.getElementById('reg-phone').addEventListener('input', function(e) {
             const value = e.target.value;
             const errorEl = document.getElementById('phone-error');
@@ -962,7 +943,6 @@
             if (value && !PHONE_REGEX.test(value)) {
                 e.target.classList.add('error');
                 errorEl.classList.add('show');
-                // Érvénytelen karakterek eltávolítása
                 e.target.value = value.replace(/[^0-9]/g, '');
             } else {
                 e.target.classList.remove('error');
@@ -972,7 +952,6 @@
 
         function checkMainCode() {
             const input = document.getElementById('main-code').value.trim();
-            console.log("Beírt:", input, "| Várt:", MAIN_CODE);
             if (input === MAIN_CODE) {
                 document.getElementById('main-login').style.opacity = '0';
                 setTimeout(() => {
@@ -991,13 +970,12 @@
 
         function checkSeatingCode() {
             const input = document.getElementById('seating-code').value.trim();
-            console.log("Beírt:", input, "| Várt:", SEATING_CODE);
             if (input === SEATING_CODE) {
                 document.getElementById('seating-login').style.display = 'none';
                 showSection('seating');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.nav-btn')[3].classList.add('active');
-                loadApplicants();
+                loadFromJSONBin();
             } else {
                 document.getElementById('seating-error').classList.add('show');
                 setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
@@ -1023,25 +1001,22 @@
             event.target.classList.add('active');
         }
 
-        // EMAIL KÜLDÉS - FormSubmit.co kezelés
-        document.getElementById('registration-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // Jelentkezés küldése JSONBin-be
+        async function submitRegistration(event) {
+            event.preventDefault();
             
-            const form = this;
             const nameInput = document.getElementById('reg-name');
             const phoneInput = document.getElementById('reg-phone');
             const submitBtn = document.getElementById('submit-btn');
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
-            const successMsg = document.getElementById('reg-success');
-            const errorMsg = document.getElementById('reg-error');
             
             const name = nameInput.value.trim();
             const phone = phoneInput.value.trim();
             
             // Validálás
             if (!name || !phone) {
-                alert('Kérlek töltsd ki a név és telefonszám mezőt!');
+                alert('Kérlek töltsd ki mindkét mezőt!');
                 return;
             }
             
@@ -1063,143 +1038,184 @@
             btnSpinner.style.display = 'block';
 
             try {
-                // FormSubmit.co-ra küldés
-                const formData = new FormData(form);
-                
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
+                // Lekérjük a jelenlegi adatokat
+                const getResponse = await fetch(JSONBIN_URL, {
+                    method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'X-Master-Key': JSONBIN_API_KEY
                     }
                 });
+                
+                let currentData = { applicants: [] };
+                
+                if (getResponse.ok) {
+                    const result = await getResponse.json();
+                    currentData = result.record || { applicants: [] };
+                }
 
-                if (response.ok) {
-                    // Sikeres küldés
-                    successMsg.classList.add('show');
-                    form.reset();
+                // Ellenőrzés: már jelentkezett-e
+                const existing = currentData.applicants.find(a => 
+                    a.name.toLowerCase() === name.toLowerCase()
+                );
+                
+                if (existing) {
+                    alert(`${name} már jelentkezett!`);
+                    submitBtn.disabled = false;
+                    btnText.style.display = 'block';
+                    btnSpinner.style.display = 'none';
+                    return;
+                }
+
+                // Új jelentkező hozzáadása
+                const newApplicant = {
+                    id: Date.now(),
+                    name: name,
+                    phone: phone,
+                    date: new Date().toLocaleString('hu-HU')
+                };
+                
+                currentData.applicants.push(newApplicant);
+
+                // Frissítés JSONBin-ben
+                const putResponse = await fetch(JSONBIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(currentData)
+                });
+
+                if (putResponse.ok) {
+                    document.getElementById('reg-success').classList.add('show');
+                    document.getElementById('registration-form').reset();
                     
-                    // LocalStorage-ba is mentjük (hogy te lásd az ülésrendnél)
-                    const applicant = {
-                        id: Date.now(),
-                        name: name,
-                        phone: phone,
-                        date: new Date().toLocaleString('hu-HU')
-                    };
-                    
-                    // Ellenőrzés: már jelentkezett-e
-                    const existing = applicants.find(a => a.name.toLowerCase() === name.toLowerCase());
-                    if (!existing) {
-                        applicants.push(applicant);
-                        localStorage.setItem('pokerApplicants', JSON.stringify(applicants));
-                    }
-                    
-                    // 3 mp múlva eltűnik az üzenet
                     setTimeout(() => {
-                        successMsg.classList.remove('show');
-                    }, 5000);
+                        document.getElementById('reg-success').classList.remove('show');
+                    }, 3000);
                 } else {
-                    throw new Error('Hiba a küldésnél');
+                    throw new Error('Hiba a mentésnél');
                 }
             } catch (error) {
                 console.error('Hiba:', error);
-                errorMsg.classList.add('show');
+                document.getElementById('reg-error').classList.add('show');
                 setTimeout(() => {
-                    errorMsg.classList.remove('show');
+                    document.getElementById('reg-error').classList.remove('show');
                 }, 3000);
             } finally {
                 submitBtn.disabled = false;
                 btnText.style.display = 'block';
                 btnSpinner.style.display = 'none';
             }
-        });
+        }
 
-        // Jelentkezők betöltése az ülésrendnél
-        function loadApplicants() {
+        // Jelentkezők betöltése JSONBin-ből
+        async function loadFromJSONBin() {
             const container = document.getElementById('applicants-container');
-            const clearAllBtn = document.getElementById('clear-all-btn');
             const textarea = document.getElementById('players');
             
-            if (applicants.length === 0) {
-                container.innerHTML = '<p style="color: #888; text-align: center;">Még nincs jelentkező</p>';
-                clearAllBtn.style.display = 'none';
-                return;
-            }
+            container.innerHTML = '<p class="loading-text">Betöltés...</p>';
 
-            // Lista megjelenítése
-            container.innerHTML = applicants.map((app) => `
-                <div class="applicant-item" data-id="${app.id}">
-                    <div class="applicant-info">
-                        <div class="applicant-name">${app.name}</div>
-                        <div class="applicant-phone">${app.phone} | ${app.date}</div>
+            try {
+                const response = await fetch(JSONBIN_URL, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Hiba a betöltésnél');
+                }
+
+                const result = await response.json();
+                const data = result.record || { applicants: [] };
+                const applicants = data.applicants || [];
+
+                if (applicants.length === 0) {
+                    container.innerHTML = '<p style="color: #888; text-align: center;">Még nincs jelentkező</p>';
+                    return;
+                }
+
+                // Lista megjelenítése
+                container.innerHTML = applicants.map((app) => `
+                    <div class="applicant-item" data-id="${app.id}">
+                        <div class="applicant-info">
+                            <div class="applicant-name">${app.name}</div>
+                            <div class="applicant-phone">${app.phone} | ${app.date}</div>
+                        </div>
+                        <div class="applicant-actions">
+                            <button class="add-btn" onclick="addToSeating('${app.name.replace(/'/g, "\\'")}')">Hozzáad</button>
+                            <button class="delete-btn" onclick="deleteFromJSONBin(${app.id})">Törlés</button>
+                        </div>
                     </div>
-                    <div class="applicant-actions">
-                        <button class="add-btn" onclick="addToSeating(${app.id})">Hozzáad</button>
-                        <button class="delete-btn" onclick="deleteApplicant(${app.id})">Törlés</button>
-                    </div>
-                </div>
-            `).join('');
-            
-            clearAllBtn.style.display = 'inline-block';
-            
-            // Automatikusan beírjuk a neveket a textarea-ba
-            const names = applicants.map(a => a.name).join('\n');
-            if (!textarea.value) {
+                `).join('');
+                
+                // Automatikusan beírjuk a neveket a textarea-ba
+                const names = applicants.map(a => a.name).join('\n');
                 textarea.value = names;
+                
+            } catch (error) {
+                console.error('Betöltési hiba:', error);
+                container.innerHTML = `<p style="color: #ff4444; text-align: center;">Hiba a betöltésnél. Próbáld újra később.</p>`;
             }
         }
 
         // Jelentkező hozzáadása az ülésrendhez
-        function addToSeating(id) {
+        function addToSeating(name) {
             const textarea = document.getElementById('players');
-            const applicant = applicants.find(a => a.id === id);
             
-            if (!applicant) return;
-            
-            if (textarea.value.includes(applicant.name)) {
-                alert(`${applicant.name} már szerepel a listában!`);
+            if (textarea.value.includes(name)) {
+                alert(`${name} már szerepel a listában!`);
                 return;
             }
             
             if (textarea.value && !textarea.value.endsWith('\n')) {
                 textarea.value += '\n';
             }
-            textarea.value += applicant.name + '\n';
+            textarea.value += name + '\n';
         }
 
-        // Egyéni jelentkező törlése
-        function deleteApplicant(id) {
+        // Jelentkező törlése JSONBin-ből
+        async function deleteFromJSONBin(id) {
             if (!confirm('Biztosan törlöd ezt a jelentkezőt?')) return;
-            
-            applicants = applicants.filter(a => a.id !== id);
-            localStorage.setItem('pokerApplicants', JSON.stringify(applicants));
-            
-            // Frissítjük a listát és a textarea-t
-            loadApplicants();
-            updateTextarea();
-        }
 
-        // Összes jelentkező törlése
-        function clearAllApplicants() {
-            if (!confirm('Biztosan törlöd az ÖSSZES jelentkezőt?')) return;
-            
-            applicants = [];
-            localStorage.removeItem('pokerApplicants');
-            loadApplicants();
-            document.getElementById('players').value = '';
-        }
+            try {
+                // Lekérjük a jelenlegi adatokat
+                const getResponse = await fetch(JSONBIN_URL, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
+                    }
+                });
+                
+                if (!getResponse.ok) throw new Error('Hiba');
+                
+                const result = await getResponse.json();
+                const data = result.record || { applicants: [] };
+                
+                // Törlés
+                data.applicants = data.applicants.filter(a => a.id !== id);
 
-        // Textarea frissítése törlés után
-        function updateTextarea() {
-            const textarea = document.getElementById('players');
-            const currentNames = textarea.value.split('\n').filter(n => n.trim());
-            
-            // Csak azokat hagyjuk meg, akik még szerepelnek a listában
-            const validNames = currentNames.filter(name => 
-                applicants.some(a => a.name === name)
-            );
-            
-            textarea.value = validNames.join('\n');
+                // Mentés
+                const putResponse = await fetch(JSONBIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (putResponse.ok) {
+                    loadFromJSONBin(); // Frissítés
+                } else {
+                    throw new Error('Hiba a törlésnél');
+                }
+            } catch (error) {
+                console.error('Törlési hiba:', error);
+                alert('Hiba történt a törlésnél!');
+            }
         }
 
         function generateSeating() {
@@ -1242,7 +1258,6 @@
             resultsDiv.classList.add('show');
         }
 
-        // (EZT NEKED KELL BEÍRNI: blind szintek - ha máshogy akarod)
         function generateStructure() {
             const levels = [
                 {sb: 100, bb: 100, ante: 0},
