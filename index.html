@@ -375,6 +375,7 @@
             transition: all 0.3s;
             display: block;
             margin: 2rem auto 0;
+            width: 100%;
         }
 
         .submit-btn:hover:not(:disabled) {
@@ -508,17 +509,6 @@
             background: #34ce57;
         }
 
-        .sheet-link {
-            color: #dc143c;
-            text-decoration: none;
-            margin-left: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .sheet-link:hover {
-            text-decoration: underline;
-        }
-
         .applicant-item {
             background: rgba(40, 0, 0, 0.5);
             border: 1px solid #dc143c;
@@ -567,10 +557,34 @@
             background: #34ce57;
         }
 
-        .loading {
-            color: #888;
-            text-align: center;
-            padding: 2rem;
+        .delete-btn {
+            background: #dc143c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .delete-btn:hover {
+            background: #ff1744;
+        }
+
+        .clear-all-btn {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .clear-all-btn:hover {
+            background: #666;
         }
 
         /* Structure Table */
@@ -622,7 +636,7 @@
                 justify-content: stretch;
             }
 
-            .add-btn {
+            .add-btn, .delete-btn {
                 flex: 1;
             }
         }
@@ -645,6 +659,23 @@
         .suit-2 { top: 20%; right: 15%; animation-delay: 5s; }
         .suit-3 { bottom: 20%; left: 20%; animation-delay: 10s; }
         .suit-4 { bottom: 10%; right: 10%; animation-delay: 15s; }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #333;
+            border-top: 3px solid #dc143c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -660,7 +691,7 @@
             <div class="logo">🃏</div>
             <h1>Poker Night</h1>
             <p class="subtitle">Add meg a belépési kódot</p>
-            <input type="text" class="code-input" id="main-code" placeholder="KÓD" maxlength="10">
+            <input type="tel" class="code-input" id="main-code" placeholder="KÓD" maxlength="10" inputmode="numeric">
             <button class="btn" onclick="checkMainCode()">Belépés</button>
             <p class="error-msg" id="main-error">Hibás kód!</p>
         </div>
@@ -672,7 +703,7 @@
             <div class="logo">🪑</div>
             <h1>Ülésrend</h1>
             <p class="subtitle">Külön kód szükséges az ülésrendhez</p>
-            <input type="text" class="code-input" id="seating-code" placeholder="KÓD" maxlength="10">
+            <input type="tel" class="code-input" id="seating-code" placeholder="KÓD" maxlength="10" inputmode="numeric">
             <button class="btn" onclick="checkSeatingCode()">Belépés</button>
             <p class="error-msg" id="seating-error">Hibás kód!</p>
             <p class="hint"></p>
@@ -787,24 +818,39 @@
             <div class="form-container">
                 <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">📝 Jelentkezés a Tournament-re</h2>
                 
-                <form id="registration-form" onsubmit="submitRegistration(event)">
+                <!-- FormSubmit.co form - email küldés -->
+                <form id="registration-form" action="https://formsubmit.co/bartazsigu10@gmail.com" method="POST">
+                    <!-- FormSubmit beállítások -->
+                    <input type="hidden" name="_subject" value="🃏 Új Poker Night jelentkezés!">
+                    <input type="hidden" name="_template" value="table">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_next" value="javascript:void(0);">
+                    
                     <div class="form-group">
                         <label for="reg-name">Név *</label>
-                        <input type="text" id="reg-name" placeholder="Add meg a neved (csak betűk)" maxlength="50">
+                        <input type="text" id="reg-name" name="Név" placeholder="Add meg a neved (csak betűk)" maxlength="50" required>
                         <p class="input-error" id="name-error">Csak betűket és szóközt használhatsz!</p>
                     </div>
 
                     <div class="form-group">
                         <label for="reg-phone">Telefonszám *</label>
-                        <input type="tel" id="reg-phone" placeholder="Pl: 06301234567 (csak számok)" maxlength="15">
+                        <input type="tel" id="reg-phone" name="Telefonszám" placeholder="Pl: 06301234567 (csak számok)" maxlength="15" required>
                         <p class="input-error" id="phone-error">Csak számokat használhatsz!</p>
                     </div>
 
-                    <button type="submit" class="submit-btn" id="submit-btn">Jelentkezés küldése</button>
+                    <div class="form-group">
+                        <label for="reg-email">Email (opcionális)</label>
+                        <input type="text" id="reg-email" name="Email" placeholder="Ha szeretnél visszaigazolást" maxlength="100">
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submit-btn">
+                        <span id="btn-text">Jelentkezés küldése</span>
+                        <div class="spinner" id="btn-spinner"></div>
+                    </button>
                 </form>
 
-                <p class="success-msg" id="reg-success">✅ Sikeres jelentkezés! Várunk a versenyen!</p>
-                <p class="error-msg" id="reg-error" style="margin-top: 1rem;">❌ Hiba történt, próbáld újra!</p>
+                <p class="success-msg" id="reg-success">✅ Sikeres jelentkezés! Az adatokat elküldtük emailben.</p>
+                <p class="error-msg" id="reg-error" style="margin-top: 1rem; text-align: center;">❌ Hiba történt, próbáld újra!</p>
             </div>
         </section>
 
@@ -847,7 +893,7 @@
                 <div class="input-section">
                     <div class="form-group">
                         <label for="players">Játékosok nevei (soronként egy név):</label>
-                        <textarea id="players" placeholder="Töltsd be a jelentkezőket a Frissítés gombbal..."></textarea>
+                        <textarea id="players" placeholder="Itt látod a jelentkezőket, vagy adj meg új neveket..."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -858,13 +904,14 @@
                     <button class="generate-btn" onclick="generateSeating()">Ülésrend Generálása</button>
                 </div>
 
-                <!-- Google Sheets jelentkezők -->
+                <!-- Jelentkezők listája (csak te látod) -->
                 <div class="applicants-list" id="applicants-section">
-                    <h3 style="color: #dc143c; margin-bottom: 1rem;">📋 Jelentkezők listája (Google Sheets)</h3>
-                    <button class="refresh-btn" onclick="loadFromGoogleSheets()">🔄 Frissítés</button>
-                    <a href="YOUR_GOOGLE_SHEET_URL" target="_blank" class="sheet-link">Táblázat megnyitása →</a>
+                    <h3 style="color: #dc143c; margin-bottom: 1rem;">📋 Jelentkezők listája</h3>
                     <div id="applicants-container">
-                        <p class="loading">Kattints a Frissítés gombra a jelentkezők betöltéséhez</p>
+                        <p style="color: #888; text-align: center;">Még nincs jelentkező</p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="clear-all-btn" onclick="clearAllApplicants()" style="display: none;" id="clear-all-btn">Összes törlése</button>
                     </div>
                 </div>
 
@@ -881,11 +928,11 @@
         const MAIN_CODE = '4825';
         const SEATING_CODE = '482550';
 
-     // (EZT NEKED KELL BEÍRNI: Google Sheets Web App URL) - Apps Script deploy link
-const GOOGLE_SCRIPT_URL = https://script.google.com/macros/s/AKfycbx1leIlpSPyMMGtdInI0CGs-2LR5KEOiTD0-8OdUYEejkbRwj2oYc4deAFIEthIdNzX0A/exec;
+        // Email cím a jelentkezések fogadásához
+        const EMAIL_ADDRESS = 'bartazsigu10@gmail.com';
 
-// (EZT NEKED KELL BEÍRNI: Google Sheets publikus URL) - Sima megtekintő link
-const GOOGLE_SHEET_URL = https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyDuBowIcfqTGxZj07ByfaflALt37g3s/edit?usp=sharing;
+        // Jelentkezők tárolása (localStorage - csak a te gépeden látszik!)
+        let applicants = JSON.parse(localStorage.getItem('pokerApplicants') || '[]');
 
         // Validációs regex-ek
         const NAME_REGEX = /^[a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ\s]+$/;
@@ -899,6 +946,7 @@ const GOOGLE_SHEET_URL = https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyDu
             if (value && !NAME_REGEX.test(value)) {
                 e.target.classList.add('error');
                 errorEl.classList.add('show');
+                // Érvénytelen karakterek eltávolítása
                 e.target.value = value.replace(/[^a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ\s]/g, '');
             } else {
                 e.target.classList.remove('error');
@@ -914,6 +962,7 @@ const GOOGLE_SHEET_URL = https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyDu
             if (value && !PHONE_REGEX.test(value)) {
                 e.target.classList.add('error');
                 errorEl.classList.add('show');
+                // Érvénytelen karakterek eltávolítása
                 e.target.value = value.replace(/[^0-9]/g, '');
             } else {
                 e.target.classList.remove('error');
@@ -922,34 +971,38 @@ const GOOGLE_SHEET_URL = https://docs.google.com/spreadsheets/d/1CS4LVMcDZWAyyDu
         });
 
         function checkMainCode() {
-    const input = document.getElementById('main-code').value.trim();
-    console.log("Beírt:", input, "| Várt:", MAIN_CODE);
-    if (input === MAIN_CODE) {
-        document.getElementById('main-login').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('main-login').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-        }, 500);
-    } else {
-        document.getElementById('main-error').classList.add('show');
-        setTimeout(() => document.getElementById('main-error').classList.remove('show'), 3000);
-    }
-}
+            const input = document.getElementById('main-code').value.trim();
+            console.log("Beírt:", input, "| Várt:", MAIN_CODE);
+            if (input === MAIN_CODE) {
+                document.getElementById('main-login').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('main-login').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                }, 500);
+            } else {
+                document.getElementById('main-error').classList.add('show');
+                setTimeout(() => document.getElementById('main-error').classList.remove('show'), 3000);
+            }
+        }
 
-function checkSeatingCode() {
-    const input = document.getElementById('seating-code').value.trim();
-    console.log("Beírt:", input, "| Várt:", SEATING_CODE);
-    if (input === SEATING_CODE) {
-        document.getElementById('seating-login').style.display = 'none';
-        showSection('seating');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.nav-btn')[3].classList.add('active');
-        loadFromGoogleSheets();
-    } else {
-        document.getElementById('seating-error').classList.add('show');
-        setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
-    }
-}
+        function openSeatingLogin() {
+            document.getElementById('seating-login').style.display = 'flex';
+        }
+
+        function checkSeatingCode() {
+            const input = document.getElementById('seating-code').value.trim();
+            console.log("Beírt:", input, "| Várt:", SEATING_CODE);
+            if (input === SEATING_CODE) {
+                document.getElementById('seating-login').style.display = 'none';
+                showSection('seating');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.nav-btn')[3].classList.add('active');
+                loadApplicants();
+            } else {
+                document.getElementById('seating-error').classList.add('show');
+                setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
+            }
+        }
 
         function backToMain() {
             document.getElementById('seating-login').style.display = 'none';
@@ -970,19 +1023,25 @@ function checkSeatingCode() {
             event.target.classList.add('active');
         }
 
-        // Jelentkezés küldése Google Sheets-be
-        async function submitRegistration(event) {
-            event.preventDefault();
+        // EMAIL KÜLDÉS - FormSubmit.co kezelés
+        document.getElementById('registration-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
+            const form = this;
             const nameInput = document.getElementById('reg-name');
             const phoneInput = document.getElementById('reg-phone');
             const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const successMsg = document.getElementById('reg-success');
+            const errorMsg = document.getElementById('reg-error');
+            
             const name = nameInput.value.trim();
             const phone = phoneInput.value.trim();
             
             // Validálás
             if (!name || !phone) {
-                alert('Kérlek töltsd ki mindkét mezőt!');
+                alert('Kérlek töltsd ki a név és telefonszám mezőt!');
                 return;
             }
             
@@ -998,117 +1057,149 @@ function checkSeatingCode() {
                 return;
             }
 
-            // Gomb letiltása töltés alatt
+            // Gomb letiltása + spinner
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Küldés...';
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'block';
 
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                // FormSubmit.co-ra küldés
+                const formData = new FormData(form);
+                
+                const response = await fetch(form.action, {
                     method: 'POST',
-                    body: JSON.stringify({
-                        name: name,
-                        phone: phone
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.result === 'success') {
-                    document.getElementById('reg-success').classList.add('show');
-                    document.getElementById('registration-form').reset();
-                    setTimeout(() => {
-                        document.getElementById('reg-success').classList.remove('show');
-                    }, 3000);
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                console.error('Hiba:', error);
-                document.getElementById('reg-error').classList.add('show');
-                setTimeout(() => {
-                    document.getElementById('reg-error').classList.remove('show');
-                }, 3000);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Jelentkezés küldése';
-            }
-        }
-
-        // Jelentkezők betöltése Google Sheets-ből
-        async function loadFromGoogleSheets() {
-            const container = document.getElementById('applicants-container');
-            const textarea = document.getElementById('players');
-            
-            container.innerHTML = '<p class="loading">Betöltés...</p>';
-
-            try {
-                // Google Sheets publikus CSV export
-                const sheetId = GOOGLE_SHEET_URL.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
-                if (!sheetId) {
-                    throw new Error('Érvénytelen Sheet URL');
-                }
-
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-                
-                const response = await fetch(csvUrl);
-                const csvText = await response.text();
-                
-                // CSV feldolgozás
-                const rows = csvText.split('\n').slice(1); // Fejléc kihagyása
-                const applicants = [];
-                
-                rows.forEach(row => {
-                    const cols = row.split(',');
-                    if (cols[0] && cols[1]) {
-                        applicants.push({
-                            name: cols[0].trim().replace(/"/g, ''),
-                            phone: cols[1].trim().replace(/"/g, ''),
-                            date: cols[2]?.trim().replace(/"/g, '') || ''
-                        });
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
                     }
                 });
 
-                if (applicants.length === 0) {
-                    container.innerHTML = '<p style="color: #888; text-align: center;">Még nincs jelentkező a táblázatban</p>';
-                    return;
+                if (response.ok) {
+                    // Sikeres küldés
+                    successMsg.classList.add('show');
+                    form.reset();
+                    
+                    // LocalStorage-ba is mentjük (hogy te lásd az ülésrendnél)
+                    const applicant = {
+                        id: Date.now(),
+                        name: name,
+                        phone: phone,
+                        date: new Date().toLocaleString('hu-HU')
+                    };
+                    
+                    // Ellenőrzés: már jelentkezett-e
+                    const existing = applicants.find(a => a.name.toLowerCase() === name.toLowerCase());
+                    if (!existing) {
+                        applicants.push(applicant);
+                        localStorage.setItem('pokerApplicants', JSON.stringify(applicants));
+                    }
+                    
+                    // 3 mp múlva eltűnik az üzenet
+                    setTimeout(() => {
+                        successMsg.classList.remove('show');
+                    }, 5000);
+                } else {
+                    throw new Error('Hiba a küldésnél');
                 }
-
-                // Lista megjelenítése
-                container.innerHTML = applicants.map((app, index) => `
-                    <div class="applicant-item">
-                        <div class="applicant-info">
-                            <div class="applicant-name">${app.name}</div>
-                            <div class="applicant-phone">${app.phone} ${app.date ? '| ' + app.date : ''}</div>
-                        </div>
-                        <div class="applicant-actions">
-                            <button class="add-btn" onclick="addToSeating('${app.name.replace(/'/g, "\\'")}')">Hozzáad</button>
-                        </div>
-                    </div>
-                `).join('');
-                
-                // Automatikusan beírjuk a neveket a textarea-ba
-                const names = applicants.map(a => a.name).join('\n');
-                textarea.value = names;
-                
             } catch (error) {
-                console.error('Betöltési hiba:', error);
-                container.innerHTML = `<p style="color: #ff4444; text-align: center;">Hiba a betöltésnél. <a href="${GOOGLE_SHEET_URL}" target="_blank" style="color: #dc143c;">Nyisd meg a táblázatot</a> és másold be manuálisan.</p>`;
+                console.error('Hiba:', error);
+                errorMsg.classList.add('show');
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                }, 3000);
+            } finally {
+                submitBtn.disabled = false;
+                btnText.style.display = 'block';
+                btnSpinner.style.display = 'none';
+            }
+        });
+
+        // Jelentkezők betöltése az ülésrendnél
+        function loadApplicants() {
+            const container = document.getElementById('applicants-container');
+            const clearAllBtn = document.getElementById('clear-all-btn');
+            const textarea = document.getElementById('players');
+            
+            if (applicants.length === 0) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">Még nincs jelentkező</p>';
+                clearAllBtn.style.display = 'none';
+                return;
+            }
+
+            // Lista megjelenítése
+            container.innerHTML = applicants.map((app) => `
+                <div class="applicant-item" data-id="${app.id}">
+                    <div class="applicant-info">
+                        <div class="applicant-name">${app.name}</div>
+                        <div class="applicant-phone">${app.phone} | ${app.date}</div>
+                    </div>
+                    <div class="applicant-actions">
+                        <button class="add-btn" onclick="addToSeating(${app.id})">Hozzáad</button>
+                        <button class="delete-btn" onclick="deleteApplicant(${app.id})">Törlés</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            clearAllBtn.style.display = 'inline-block';
+            
+            // Automatikusan beírjuk a neveket a textarea-ba
+            const names = applicants.map(a => a.name).join('\n');
+            if (!textarea.value) {
+                textarea.value = names;
             }
         }
 
         // Jelentkező hozzáadása az ülésrendhez
-        function addToSeating(name) {
+        function addToSeating(id) {
             const textarea = document.getElementById('players');
+            const applicant = applicants.find(a => a.id === id);
             
-            if (textarea.value.includes(name)) {
-                alert(`${name} már szerepel a listában!`);
+            if (!applicant) return;
+            
+            if (textarea.value.includes(applicant.name)) {
+                alert(`${applicant.name} már szerepel a listában!`);
                 return;
             }
             
             if (textarea.value && !textarea.value.endsWith('\n')) {
                 textarea.value += '\n';
             }
-            textarea.value += name + '\n';
+            textarea.value += applicant.name + '\n';
+        }
+
+        // Egyéni jelentkező törlése
+        function deleteApplicant(id) {
+            if (!confirm('Biztosan törlöd ezt a jelentkezőt?')) return;
+            
+            applicants = applicants.filter(a => a.id !== id);
+            localStorage.setItem('pokerApplicants', JSON.stringify(applicants));
+            
+            // Frissítjük a listát és a textarea-t
+            loadApplicants();
+            updateTextarea();
+        }
+
+        // Összes jelentkező törlése
+        function clearAllApplicants() {
+            if (!confirm('Biztosan törlöd az ÖSSZES jelentkezőt?')) return;
+            
+            applicants = [];
+            localStorage.removeItem('pokerApplicants');
+            loadApplicants();
+            document.getElementById('players').value = '';
+        }
+
+        // Textarea frissítése törlés után
+        function updateTextarea() {
+            const textarea = document.getElementById('players');
+            const currentNames = textarea.value.split('\n').filter(n => n.trim());
+            
+            // Csak azokat hagyjuk meg, akik még szerepelnek a listában
+            const validNames = currentNames.filter(name => 
+                applicants.some(a => a.name === name)
+            );
+            
+            textarea.value = validNames.join('\n');
         }
 
         function generateSeating() {
@@ -1179,9 +1270,6 @@ function checkSeatingCode() {
                 </tr>
             `).join('');
         }
-
-        // Sheet URL beállítása linkhez
-        document.querySelector('.sheet-link').href = GOOGLE_SHEET_URL;
 
         document.getElementById('main-code').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') checkMainCode();
