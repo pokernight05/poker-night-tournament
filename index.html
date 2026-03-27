@@ -117,6 +117,18 @@
             opacity: 1;
         }
 
+        .success-msg {
+            color: #28a745;
+            margin-top: 1rem;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .success-msg.show {
+            opacity: 1;
+        }
+
         .hint {
             color: #666;
             font-size: 0.8rem;
@@ -283,19 +295,17 @@
             font-weight: bold;
         }
 
-        /* Seating Generator */
-        .seating-container {
+        /* Form Styles */
+        .form-container {
             background: rgba(20, 0, 0, 0.9);
             border-radius: 20px;
             padding: 2rem;
             border: 1px solid #333;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
-        .input-section {
-            margin-bottom: 2rem;
-        }
-
-        .input-group {
+        .form-group {
             margin-bottom: 1.5rem;
         }
 
@@ -306,7 +316,7 @@
             font-weight: bold;
         }
 
-        textarea, input[type="number"] {
+        input[type="text"], input[type="tel"], textarea, input[type="number"] {
             width: 100%;
             padding: 1rem;
             background: #0a0a0a;
@@ -317,15 +327,48 @@
             transition: all 0.3s;
         }
 
+        input[type="text"]:focus, input[type="tel"]:focus, textarea:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #dc143c;
+        }
+
         textarea {
             min-height: 150px;
             resize: vertical;
             font-family: inherit;
         }
 
-        textarea:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #dc143c;
+        .submit-btn {
+            background: linear-gradient(135deg, #dc143c, #ff1744);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: block;
+            margin: 2rem auto 0;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(220, 20, 60, 0.4);
+        }
+
+        /* Seating Generator */
+        .seating-container {
+            background: rgba(20, 0, 0, 0.9);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid #333;
+        }
+
+        .input-section {
+            margin-bottom: 2rem;
         }
 
         .generate-btn {
@@ -418,6 +461,69 @@
             font-size: 0.9rem;
         }
 
+        /* Applicants List */
+        .applicants-list {
+            background: rgba(10, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid #333;
+        }
+
+        .applicant-item {
+            background: rgba(40, 0, 0, 0.5);
+            border: 1px solid #dc143c;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .applicant-info {
+            color: #e0e0e0;
+        }
+
+        .applicant-name {
+            color: #dc143c;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .applicant-phone {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .add-btn:hover {
+            background: #34ce57;
+        }
+
+        .clear-btn {
+            background: #dc143c;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .clear-btn:hover {
+            background: #ff1744;
+        }
+
         /* Structure Table */
         table {
             width: 100%;
@@ -452,6 +558,10 @@
                 width: 250px;
                 height: 170px;
             }
+
+            .form-container {
+                padding: 1.5rem;
+            }
         }
 
         /* Decorative elements */
@@ -484,7 +594,7 @@
     <!-- MAIN LOGIN (Code: 4825) -->
     <div id="main-login" class="login-screen">
         <div class="login-container">
-            <div class="logo">🃜🃚🃖🃁🂭🂺</div>
+            <div class="logo">🃏</div>
             <h1>Poker Night</h1>
             <p class="subtitle">Add meg a belépési kódot</p>
             <input type="text" class="code-input" id="main-code" placeholder="KÓD" maxlength="10">
@@ -518,6 +628,7 @@
 
         <nav>
             <button class="nav-btn active" onclick="showSection('info')">📋 Infók</button>
+            <button class="nav-btn" onclick="showSection('register')">📝 Jelentkezés</button>
             <button class="nav-btn" onclick="showSection('structure')">⏱️ Struktúra</button>
             <button class="nav-btn locked" onclick="openSeatingLogin()">🪑 Ülésrend</button>
         </nav>
@@ -598,13 +709,36 @@
                 <h2 style="color: #dc143c; margin-bottom: 1rem; text-align: center;">Fontos Szabályok</h2>
                 <!-- (EZT NEKED KELL BEÍRNI: szabályok) -->
                 <ul style="color: #aaa; line-height: 2; padding-left: 2rem;">
-<li>Barátságos légkör, de komoly játék!</li>
+                    <li>Barátságos légkör, de komoly játék!</li>
                     <li>Érkezz időben, késés esetén zsetonokat veszíthetsz</li>
                     <li>Mobiltelefon használata az asztalnál tiltott (kivéve szünet)</li>
                     <li>String betek szigorúan tilosak</li>
                     <li>Döntetlen szín esetén a magasabb lap dönt</li>
                     <li>A zsetonokat az asztalon kell tárolni, az elötted lévő játékos döntését meg kell várni!</li>
                 </ul>
+            </div>
+        </section>
+
+        <!-- REGISTRATION SECTION -->
+        <section id="register" class="section">
+            <div class="form-container">
+                <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">📝 Jelentkezés a Tournament-re</h2>
+                
+                <form id="registration-form" onsubmit="submitRegistration(event)">
+                    <div class="form-group">
+                        <label for="reg-name">Név *</label>
+                        <input type="text" id="reg-name" placeholder="Add meg a neved" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-phone">Telefonszám *</label>
+                        <input type="tel" id="reg-phone" placeholder="Pl: 06 30 123 4567" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Jelentkezés küldése</button>
+                </form>
+
+                <p class="success-msg" id="reg-success">✅ Sikeres jelentkezés! Várunk a versenyen!</p>
             </div>
         </section>
 
@@ -645,22 +779,26 @@
                 <h2 style="color: #dc143c; margin-bottom: 2rem; text-align: center;">🎲 Random Ülésrend Generátor</h2>
                 
                 <div class="input-section">
-                    <div class="input-group">
+                    <div class="form-group">
                         <label for="players">Játékosok nevei (soronként egy név):</label>
-                        <textarea id="players" placeholder="Példa:
-Gábor
-Attila
-Zsolt
-Máté
-..."></textarea>
+                        <textarea id="players" placeholder="Itt látod a jelentkezőket, vagy adj meg új neveket..."></textarea>
                     </div>
 
-                    <div class="input-group">
+                    <div class="form-group">
                         <label for="table-size">Egy asztalnál ülők száma:</label>
-                        <input type="number" id="table-size" value="8" min="2" max="10">
+                        <input type="number" id="table-size" value="7" min="2" max="10">
                     </div>
 
                     <button class="generate-btn" onclick="generateSeating()">Ülésrend Generálása</button>
+                </div>
+
+                <!-- Jelentkezők listája (csak te látod) -->
+                <div class="applicants-list" id="applicants-section">
+                    <h3 style="color: #dc143c; margin-bottom: 1rem;">📋 Jelentkezők listája</h3>
+                    <div id="applicants-container">
+                        <p style="color: #888; text-align: center;">Még nincs jelentkező</p>
+                    </div>
+                    <button class="clear-btn" onclick="clearApplicants()" style="display: none;" id="clear-btn">Lista törlése</button>
                 </div>
 
                 <div id="results" class="results">
@@ -675,6 +813,9 @@ Máté
         // (EZT NEKED KELL BEÍRNI: belépési kódok)
         const MAIN_CODE = '4825';
         const SEATING_CODE = '482550';
+
+        // Jelentkezők tárolása (localStorage)
+        let applicants = JSON.parse(localStorage.getItem('pokerApplicants') || '[]');
 
         function checkMainCode() {
             const input = document.getElementById('main-code').value;
@@ -700,7 +841,8 @@ Máté
                 document.getElementById('seating-login').style.display = 'none';
                 showSection('seating');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.nav-btn')[2].classList.add('active');
+                document.querySelectorAll('.nav-btn')[3].classList.add('active');
+                loadApplicants(); // Betöltjük a jelentkezőket
             } else {
                 document.getElementById('seating-error').classList.add('show');
                 setTimeout(() => document.getElementById('seating-error').classList.remove('show'), 3000);
@@ -724,6 +866,98 @@ Máté
             });
             document.getElementById(sectionId).classList.add('active');
             event.target.classList.add('active');
+        }
+
+        // Jelentkezés kezelése
+        function submitRegistration(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            
+            if (!name || !phone) {
+                alert('Kérlek töltsd ki mindkét mezőt!');
+                return;
+            }
+
+            // Jelentkező hozzáadása
+            const applicant = {
+                name: name,
+                phone: phone,
+                date: new Date().toLocaleString('hu-HU')
+            };
+            
+            applicants.push(applicant);
+            localStorage.setItem('pokerApplicants', JSON.stringify(applicants));
+            
+            // Siker üzenet
+            document.getElementById('reg-success').classList.add('show');
+            
+            // Form törlése
+            document.getElementById('registration-form').reset();
+            
+            // 3 mp múlva eltűnik az üzenet
+            setTimeout(() => {
+                document.getElementById('reg-success').classList.remove('show');
+            }, 3000);
+        }
+
+        // Jelentkezők betöltése az ülésrendnél
+        function loadApplicants() {
+            const container = document.getElementById('applicants-container');
+            const clearBtn = document.getElementById('clear-btn');
+            const textarea = document.getElementById('players');
+            
+            if (applicants.length === 0) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">Még nincs jelentkező</p>';
+                clearBtn.style.display = 'none';
+                return;
+            }
+
+            // Lista megjelenítése
+            container.innerHTML = applicants.map((app, index) => `
+                <div class="applicant-item">
+                    <div class="applicant-info">
+                        <div class="applicant-name">${app.name}</div>
+                        <div class="applicant-phone">${app.phone} | ${app.date}</div>
+                    </div>
+                    <button class="add-btn" onclick="addToSeating(${index})">Hozzáad</button>
+                </div>
+            `).join('');
+            
+            clearBtn.style.display = 'block';
+            
+            // Automatikusan beírjuk a neveket a textarea-ba
+            const names = applicants.map(a => a.name).join('\n');
+            if (!textarea.value) {
+                textarea.value = names;
+            }
+        }
+
+        // Jelentkező hozzáadása az ülésrendhez
+        function addToSeating(index) {
+            const textarea = document.getElementById('players');
+            const name = applicants[index].name;
+            
+            if (textarea.value.includes(name)) {
+                alert(`${name} már szerepel a listában!`);
+                return;
+            }
+            
+            if (textarea.value && !textarea.value.endsWith('\n')) {
+                textarea.value += '\n';
+            }
+            textarea.value += name + '\n';
+        }
+
+        // Jelentkezők törlése
+        function clearApplicants() {
+            if (!confirm('Biztosan törlöd az összes jelentkezőt?')) return;
+            
+            applicants = [];
+            localStorage.removeItem('pokerApplicants');
+            loadApplicants();
+            document.getElementById('players').value = '';
         }
 
         function generateSeating() {
