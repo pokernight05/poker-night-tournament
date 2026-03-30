@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Póker Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; min-height: 100vh; color: #fff; }
+        .container { max-width: 480px; margin: 0 auto; padding: 15px; padding-bottom: 80px; }
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 5px; color: #ff4444; text-transform: uppercase; letter-spacing: 2px; }
+        .subtitle { text-align: center; font-size: 0.75rem; color: #666; margin-bottom: 15px; }
+        
+        .phase-indicator { display: flex; justify-content: space-between; margin-bottom: 15px; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 8px; }
+        .phase { flex: 1; text-align: center; padding: 6px 2px; border-radius: 6px; font-size: 0.65rem; font-weight: 700; opacity: 0.4; color: #666; }
+        .phase.active { background: rgba(255,0,0,0.3); opacity: 1; color: #ff4444; }
+        .phase.completed { opacity: 1; color: #888; }
+        
+        .card-section { background: #1a1a1a; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,0,0,0.15); }
+        .section-title { font-size: 0.95rem; margin-bottom: 12px; color: #ff4444; font-weight: 700; text-transform: uppercase; }
+        
+        .card-display { background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; margin-bottom: 12px; min-height: 70px; border: 1px dashed rgba(255,0,0,0.2); }
+        .card-label { font-size: 0.7rem; color: #666; margin-bottom: 8px; text-transform: uppercase; }
+        .selected-cards { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        
+        .card { width: 45px; height: 60px; background: #fff; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .card.red { color: #cc0000; }
+        .card.black { color: #000; }
+        .card-rank { font-size: 1.1rem; }
+        .card-suit { font-size: 1.3rem; }
+        
+        .mini-card { width: 25px; height: 35px; background: #fff; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+        .mini-card.red { color: #cc0000; }
+        .mini-card.black { color: #000; }
+        
+        .selector-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px; }
+        .selector-btn { padding: 10px 4px; border: 1px solid #333; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; background: #222; color: #fff; }
+        .selector-btn:hover { background: rgba(255,0,0,0.2); }
+        .selector-btn.selected { background: #cc0000; border-color: #ff4444; }
+        .selector-btn.suit-hearts, .selector-btn.suit-diamonds { color: #ff4444; }
+        .selector-btn.suit-hearts.selected, .selector-btn.suit-diamonds.selected { background: #cc0000; color: #fff; }
+        
+        .action-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 8px; }
+        .btn-primary { background: #cc0000; color: #fff; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-back { background: #333; color: #fff; }
+        
+        .button-group { display: flex; gap: 8px; }
+        .button-group .btn-back { flex: 1; }
+        .button-group .btn-primary { flex: 2; }
+        
+        .odds-display { background: #1a1a1a; border-radius: 12px; padding: 20px; text-align: center; margin: 12px 0; border: 1px solid rgba(255,0,0,0.3); }
+        .odds-percentage { font-size: 3rem; font-weight: 900; color: #ff4444; }
+        .odds-label { font-size: 0.8rem; color: #666; margin-top: 5px; text-transform: uppercase; }
+        .hand-info { font-size: 1.1rem; margin-top: 10px; color: #fff; font-weight: 700; }
+        .hand-detail { font-size: 0.85rem; color: #888; margin-top: 5px; }
+        .progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #cc0000; border-radius: 3px; transition: width 0.5s; }
+        
+        .info-section { background: #1a1a1a; border-radius: 10px; padding: 12px; margin: 10px 0; border-left: 3px solid; }
+        .outs-section { border-color: #4caf50; }
+        .outs-title { color: #4caf50; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; }
+        .best-section { border-color: #ffd700; }
+        .best-title { color: #ffd700; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; }
+        .cards-list { display: flex; gap: 6px; flex-wrap: wrap; }
+        .out-card { background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.4); padding: 6px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: 700; color: #4caf50; }
+        .best-card { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.4); padding: 6px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: 700; color: #ffd700; }
+        
+        .hidden { display: none !important; }
+        .empty-state { color: #444; font-style: italic; text-align: center; padding: 15px; font-size: 0.85rem; }
+        
+        .floating-reset { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: #cc0000; color: #fff; border: none; padding: 14px 28px; border-radius: 25px; font-weight: 700; font-size: 0.95rem; cursor: pointer; z-index: 1000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>♠ Póker Pro ♥</h1>
+        <p class="subtitle">Esélykalkulátor</p>
+
+        <div class="phase-indicator">
+            <div class="phase active" id="phase-setup">Beállítás</div>
+            <div class="phase" id="phase-preflop">Preflop</div>
+            <div class="phase" id="phase-flop">Flop</div>
+            <div class="phase" id="phase-turn">Turn</div>
+            <div class="phase" id="phase-river">River</div>
+        </div>
+
+        <div id="setup-section" class="card-section">
+            <div class="section-title">👥 Játékosok: <span id="player-count">6</span></div>
+            <input type="range" id="player-slider" min="2" max="9" value="6" style="width: 100%; margin-bottom: 15px;">
+            <button class="action-btn btn-primary" onclick="confirmSetup()">Tovább →</button>
+        </div>
+
+        <div id="hole-cards-section" class="card-section hidden">
+            <div class="section-title">🎴 Kezdőlapok</div>
+            <div class="card-display">
+                <div class="card-label">Saját lapjaid:</div>
+                <div class="selected-cards" id="hole-cards-display"><div class="empty-state">Válassz 2 lapot</div></div>
+            </div>
+            <div class="selector-grid" id="hole-rank-selector"></div>
+            <div class="selector-grid" id="hole-suit-selector" style="grid-template-columns: repeat(4, 1fr);"></div>
+            <div class="button-group">
+                <button class="action-btn btn-back" onclick="goBack('setup')">←</button>
+                <button class="action-btn btn-primary" id="confirm-hole-btn" disabled>Kész</button>
+            </div>
+        </div>
+
+        <div id="community-section" class="card-section hidden">
+            <div class="section-title" id="community-title">🎯 Közös lapok</div>
+            <div class="card-display">
+                <div class="card-label">Saját:</div>
+                <div class="selected-cards" id="my-cards-display-small"></div>
+            </div>
+            <div class="card-display">
+                <div class="card-label" id="community-label">Asztal: 0/5</div>
+                <div class="selected-cards" id="community-cards-display"><div class="empty-state">Adj hozzá lapokat</div></div>
+            </div>
+            <div class="selector-grid" id="community-rank-selector"></div>
+            <div class="selector-grid" id="community-suit-selector" style="grid-template-columns: repeat(4, 1fr);"></div>
+            <div class="button-group">
+                <button class="action-btn btn-back" onclick="goBack('hole')">←</button>
+                <button class="action-btn btn-primary" id="add-community-btn" disabled>Hozzáad</button>
+            </div>
+        </div>
+
+        <div id="odds-section" class="odds-display hidden">
+            <div class="odds-label">Nyerési esély</div>
+            <div class="odds-percentage" id="win-percentage">--%</div>
+            <div class="hand-info" id="hand-strength">-</div>
+            <div class="hand-detail" id="hand-detail">-</div>
+            <div class="progress-bar"><div class="progress-fill" id="odds-bar" style="width: 0%"></div></div>
+        </div>
+
+        <div id="outs-section" class="info-section outs-section hidden">
+            <div class="outs-title">🍀 Out-ok (segítő lapok a kezedhez)</div>
+            <div class="cards-list" id="outs-list"></div>
+        </div>
+
+        <div id="best-hand-section" class="info-section best-section hidden">
+            <div class="best-title">👑 Legjobb lap a kezedhez</div>
+            <div class="cards-list" id="best-hand-list"></div>
+        </div>
+    </div>
+
+    <button class="floating-reset hidden" id="reset-btn" onclick="resetAll()">↻ Újra</button>
+
+    <script>
+        let playerCount = 6, holeCards = [], communityCards = [], currentPhase = 'setup';
+        let selectedRank = null, selectedSuit = null;
+
+        const rankValues = { '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, 'T':10, 'J':11, 'Q':12, 'K':13, 'A':14 };
+        const suitSymbols = { 'h':'♥', 'd':'♦', 'c':'♣', 's':'♠' };
+        const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+        const suits = ['h','d','c','s'];
+
+        document.getElementById('player-slider').addEventListener('input', function() {
+            playerCount = parseInt(this.value);
+            document.getElementById('player-count').textContent = playerCount;
+        });
+
+        function createSelectors(prefix) {
+            const rankContainer = document.getElementById(prefix + '-rank-selector');
+            const suitContainer = document.getElementById(prefix + '-suit-selector');
+            
+            ranks.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'selector-btn';
+                btn.textContent = r;
+                btn.onclick = () => selectRank(r, prefix);
+                rankContainer.appendChild(btn);
+            });
+            
+            suits.forEach(s => {
+                const btn = document.createElement('button');
+                btn.className = 'selector-btn suit-' + (s === 'h' || s === 'd' ? 'hearts' : 'clubs');
+                btn.textContent = suitSymbols[s];
+                btn.onclick = () => selectSuit(s, prefix);
+                suitContainer.appendChild(btn);
+            });
+        }
+
+        createSelectors('hole');
+        createSelectors('community');
+
+        function selectRank(r, prefix) {
+            selectedRank = r;
+            document.querySelectorAll('#' + prefix + '-rank-selector .selector-btn').forEach(b => b.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkSelection(prefix);
+        }
+
+        function selectSuit(s, prefix) {
+            selectedSuit = s;
+            document.querySelectorAll('#' + prefix + '-suit-selector .selector-btn').forEach(b => b.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkSelection(prefix);
+        }
+
+        function checkSelection(prefix) {
+            if (!selectedRank || !selectedSuit) return;
+            
+            const card = selectedRank + selectedSuit;
+            const used = [...holeCards, ...communityCards];
+            
+            if (used.includes(card)) {
+                alert('Lap már használatban!');
+                selectedRank = selectedSuit = null;
+                document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('selected'));
+                return;
+            }
+
+            if (prefix === 'hole' && holeCards.length < 2) {
+                holeCards.push(card);
+                updateDisplay();
+                selectedRank = selectedSuit = null;
+                document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('selected'));
+            } else if (prefix === 'community' && communityCards.length < 5) {
+                communityCards.push(card);
+                updateDisplay();
+                updatePhase();
+                calculateOdds();
+                selectedRank = selectedSuit = null;
+                document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('selected'));
+            }
+        }
+
+        function updateDisplay() {
+            const holeDisplay = document.getElementById('hole-cards-display');
+            const commDisplay = document.getElementById('community-cards-display');
+            const mySmall = document.getElementById('my-cards-display-small');
+            
+            holeDisplay.innerHTML = holeCards.map(c => createCard(c)).join('');
+            commDisplay.innerHTML = communityCards.length ? communityCards.map(c => createCard(c)).join('') : '<div class="empty-state">Adj hozzá lapokat</div>';
+            mySmall.innerHTML = holeCards.map(c => createMiniCard(c)).join('');
+            
+            document.getElementById('community-label').textContent = 'Asztal: ' + communityCards.length + '/5';
+            document.getElementById('confirm-hole-btn').textContent = 'Kész (' + holeCards.length + '/2)';
+            document.getElementById('confirm-hole-btn').disabled = holeCards.length !== 2;
+            document.getElementById('add-community-btn').textContent = communityCards.length >= 5 ? 'Kész' : 'Hozzáad (' + communityCards.length + '/5)';
+            document.getElementById('add-community-btn').disabled = communityCards.length >= 5;
+        }
+
+        function createCard(c) {
+            const isRed = c[1] === 'h' || c[1] === 'd';
+            return '<div class="card ' + (isRed ? 'red' : 'black') + '"><div class="card-rank">' + c[0] + '</div><div class="card-suit">' + suitSymbols[c[1]] + '</div></div>';
+        }
+
+        function createMiniCard(c) {
+            const isRed = c[1] === 'h' || c[1] === 'd';
+            return '<div class="mini-card ' + (isRed ? 'red' : 'black') + '">' + c[0] + suitSymbols[c[1]] + '</div>';
+        }
+
+        function confirmSetup() {
+            document.getElementById('setup-section').classList.add('hidden');
+            document.getElementById('hole-cards-section').classList.remove('hidden');
+            currentPhase = 'preflop';
+            updatePhaseIndicator();
+        }
+
+        document.getElementById('confirm-hole-btn').onclick = function() {
+            if (holeCards.length !== 2) return;
+            document.getElementById('hole-cards-section').classList.add('hidden');
+            document.getElementById('community-section').classList.remove('hidden');
+            document.getElementById('odds-section').classList.remove('hidden');
+            document.getElementById('outs-section').classList.remove('hidden');
+            document.getElementById('best-hand-section').classList.remove('hidden');
+            document.getElementById('reset-btn').classList.remove('hidden');
+            calculateOdds();
+        };
+
+        function updatePhase() {
+            if (communityCards.length === 3) currentPhase = 'flop';
+            else if (communityCards.length === 4) currentPhase = 'turn';
+            else if (communityCards.length === 5) currentPhase = 'river';
+            updatePhaseIndicator();
+        }
+
+        function updatePhaseIndicator() {
+            const phases = ['setup','preflop','flop','turn','river'];
+            phases.forEach((p, i) => {
+                const el = document.getElementById('phase-' + p);
+                const idx = phases.indexOf(currentPhase);
+                el.className = 'phase ' + (i === idx ? 'active' : i < idx ? 'completed' : '');
+            });
+        }
+
+        function goBack(to) {
+            if (to === 'setup') {
+                holeCards = [];
+                document.getElementById('hole-cards-section').classList.add('hidden');
+                document.getElementById('setup-section').classList.remove('hidden');
+                currentPhase = 'setup';
+            } else {
+                communityCards = [];
+                document.getElementById('community-section').classList.add('hidden');
+                document.getElementById('odds-section').classList.add('hidden');
+                document.getElementById('outs-section').classList.add('hidden');
+                document.getElementById('best-hand-section').classList.add('hidden');
+                document.getElementById('reset-btn').classList.add('hidden');
+                document.getElementById('hole-cards-section').classList.remove('hidden');
+                currentPhase = 'preflop';
+            }
+            updateDisplay();
+            updatePhaseIndicator();
+        }
+
+        // A LÉNYEG: Csak a saját 2 lapodból + közös lapokból a legjobb 5 kártyás kombináció
+        // De csak akkor számít a kezed, ha a saját lapjaid részt vesznek benne!
+        function evaluateHand(cards) {
+            // cards = [saját2lap, közös3-5lap] = 5-7 kártya
+            
+            // Szétválasztjuk saját és közös lapokra (az első 2 a saját)
+            const myCards = cards.slice(0, 2);
+            const communityCards = cards.slice(2);
+            
+            // Minden 5 kártyás kombináció, de kötelezően tartalmaznia kell legalább 1 saját lapot!
+            let bestScore = 0;
+            
+            // Végigmegyünk minden 5 kártyás kombináción
+            for (let i = 0; i < cards.length - 4; i++) {
+                for (let j = i + 1; j < cards.length - 3; j++) {
+                    for (let k = j + 1; k < cards.length - 2; k++) {
+                        for (let l = k + 1; l < cards.length - 1; l++) {
+                            for (let m = l + 1; m < cards.length; m++) {
+                                const combo = [cards[i], cards[j], cards[k], cards[l], cards[m]];
+                                
+                                // FONTOS: Ellenőrizzük, hogy van-e benne legalább 1 saját lap (az első 2-ből)
+                                const hasMyCard = combo.some(c => myCards.includes(c));
+                                if (!hasMyCard) continue; // Ha nincs benne saját lap, skip!
+                                
+                                const score = evaluate5Cards(combo);
+                                if (score > bestScore) bestScore = score;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Ha nem találtunk érvényes kombinációt (pl preflop), akkor csak a saját lapokat nézzük
+            if (bestScore === 0 && myCards.length === 2) {
+                // Preflop: csak a 2 saját lap
+                if (myCards[0][0] === myCards[1][0]) {
+                    // Pár
+                    return 1000000 + rankValues[myCards[0][0]];
+                }
+                return Math.max(rankValues[myCards[0][0]], rankValues[myCards[1][0]]);
+            }
+            
+            return bestScore;
+        }
+
+        function evaluate5Cards(cards) {
+            const ranks = cards.map(c => rankValues[c[0]]).sort((a,b) => b-a);
+            const suits = cards.map(c => c[1]);
+            
+            // Flush check
+            const suitCounts = {};
+            suits.forEach(s => suitCounts[s] = (suitCounts[s] || 0) + 1);
+            const isFlush = Object.values(suitCounts).some(c => c >= 5);
+            
+            // Straight check
+            const unique = [...new Set(ranks)];
+            let straightHigh = 0;
+            for (let i = 0; i <= unique.length - 5; i++) {
+                if (unique[i] - unique[i+4] === 4) straightHigh = unique[i];
+            }
+            if (!straightHigh && unique.includes(14) && unique.includes(5) && unique.includes(4) && unique.includes(3) && unique.includes(2)) {
+                straightHigh = 5;
+            }
+            
+            // Rank gyakoriságok
+            const freq = {};
+            ranks.forEach(r => freq[r] = (freq[r] || 0) + 1);
+            const counts = Object.values(freq).sort((a,b) => b-a);
+            
+            // Pontszámítás
+            if (isFlush && straightHigh) {
+                return straightHigh === 14 && ranks.includes(13) ? 9000000 : 8000000 + straightHigh;
+            }
+            if (counts[0] === 4) return 7000000 + parseInt(Object.keys(freq).find(k => freq[k] === 4));
+            if (counts[0] === 3 && counts[1] === 2) return 6000000 + parseInt(Object.keys(freq).find(k => freq[k] === 3));
+            if (isFlush) return 5000000 + ranks[0];
+            if (straightHigh) return 4000000 + straightHigh;
+            if (counts[0] === 3) return 3000000 + parseInt(Object.keys(freq).find(k => freq[k] === 3));
+            if (counts[0] === 2 && counts[1] === 2) {
+                const pairs = Object.keys(freq).filter(k => freq[k] === 2).map(Number).sort((a,b) => b-a);
+                return 2000000 + pairs[0] * 15 + pairs[1];
+            }
+            if (counts[0] === 2) return 1000000 + parseInt(Object.keys(freq).find(k => freq[k] === 2));
+            return ranks[0];
+        }
+
+        function getHandName(score) {
+            if (score >= 9000000) return "Royal Flush! 👑";
+            if (score >= 8000000) return "Színsor! 🌈";
+            if (score >= 7000000) return "Póker! 🎲";
+            if (score >= 6000000) return "Full House! 🏠";
+            if (score >= 5000000) return "Flush! 💧";
+            if (score >= 4000000) return "Sor! ➡️";
+            if (score >= 3000000) return "Drill! 🔱";
+            if (score >= 2000000) return "Két pár! 👯";
+            if (score >= 1000000) return "Egy pár! 👥";
+            return "Magas lap! 🃏";
+        }
+
+        function getHandDetail(score, cards) {
+            const myCards = cards.slice(0, 2);
+            const rankNames = {14:'A',13:'K',12:'Q',11:'J',10:'T',9:'9',8:'8',7:'7',6:'6',5:'5',4:'4',3:'3',2:'2'};
+            
+            if (score >= 8000000) return "";
+            if (score >= 7000000) {
+                const r = Object.keys(rankValues).find(k => rankValues[k] === (score - 7000000));
+                return "Négy " + r;
+            }
+            if (score >= 6000000) {
+                const trip = Math.floor((score - 6000000) / 15);
+                const pair = (score - 6000000) % 15;
+                return "Három " + rankNames[trip] + ", pár " + rankNames[pair];
+            }
+            if (score >= 5000000) return "";
+            if (score >= 4000000) return "";
+            if (score >= 3000000) {
+                const r = Object.keys(rankValues).find(k => rankValues[k] === (score - 3000000));
+                return "Három " + r;
+            }
+            if (score >= 2000000) {
+                const high = Math.floor((score - 2000000) / 15);
+                const low = (score - 2000000) % 15;
+                return "Pár " + rankNames[high] + ", pár " + rankNames[low];
+            }
+            if (score >= 1000000) {
+                // Megkeressük melyik lapunk van párosítva
+                const myRanks = myCards.map(c => c[0]);
+                const r = Object.keys(rankValues).find(k => rankValues[k] === (score - 1000000));
+                if (myRanks.includes(r)) {
+                    return "Pár " + r + " (a kezedben)";
+                }
+                return "Pár " + r + " (az asztalon)";
+            }
+            // Magas lap - a saját legmagasabb lapod
+            const myRanks = myCards.map(c => rankValues[c[0]]);
+            const high = Math.max(...myRanks);
+            return "Magas: " + rankNames[high] + " (a kezedben)";
+        }
+
+        function calculateOdds() {
+            const allCards = [...holeCards, ...communityCards];
+            const deck = [];
+            ranks.forEach(r => suits.forEach(s => {
+                const c = r + s;
+                if (!allCards.includes(c)) deck.push(c);
+            }));
+            
+            let wins = 0, ties = 0;
+            const iters = 8000;
+            
+            for (let i = 0; i < iters; i++) {
+                const temp = [...deck];
+                for (let j = temp.length - 1; j > 0; j--) {
+                    const k = Math.floor(Math.random() * (j + 1));
+                    [temp[j], temp[k]] = [temp[k], temp[j]];
+                }
+                
+                const opp = [];
+                for (let j = 0; j < playerCount - 1; j++) opp.push([temp.pop(), temp.pop()]);
+                
+                const comm = [...communityCards];
+                while (comm.length < 5) comm.push(temp.pop());
+                
+                // Saját kezem értékelése - a saját 2 lapom + közös lapok
+                const myScore = evaluateHand([...holeCards, ...comm]);
+                // Ellenfelek - mindegyiknek saját 2 lapja + közös lapok
+                const bestOpp = Math.max(...opp.map(o => evaluateHand([...o, ...comm])));
+                
+                if (myScore > bestOpp) wins++;
+                else if (myScore === bestOpp) ties++;
+            }
+            
+            const winRate = ((wins + ties/2) / iters * 100).toFixed(1);
+            document.getElementById('win-percentage').textContent = winRate + '%';
+            document.getElementById('odds-bar').style.width = winRate + '%';
+            
+            const myScore = evaluateHand(allCards);
+            document.getElementById('hand-strength').textContent = getHandName(myScore);
+            document.getElementById('hand-detail').textContent = getHandDetail(myScore, allCards);
+            
+            calculateOuts();
+            calculateBest();
+        }
+
+        function calculateOuts() {
+            const used = [...holeCards, ...communityCards];
+            const deck = [];
+            ranks.forEach(r => suits.forEach(s => {
+                const c = r + s;
+                if (!used.includes(c)) deck.push(c);
+            }));
+            
+            const current = evaluateHand([...holeCards, ...communityCards]);
+            const outs = [];
+            
+            for (let c of deck) {
+                const test = evaluateHand([...holeCards, ...communityCards, c]);
+                if (test > current) outs.push({c, s: test});
+            }
+            
+            outs.sort((a,b) => b.s - a.s);
+            document.getElementById('outs-list').innerHTML = outs.slice(0, 6).map(o => 
+                '<div class="out-card">' + o.c[0] + suitSymbols[o.c[1]] + '</div>'
+            ).join('') || '<div style="color:#666">Nincs out</div>';
+        }
+
+        function calculateBest() {
+            const used = [...holeCards, ...communityCards];
+            const deck = [];
+            ranks.forEach(r => suits.forEach(s => {
+                const c = r + s;
+                if (!used.includes(c)) deck.push(c);
+            }));
+            
+            let best = null, bestScore = -1;
+            for (let c of deck) {
+                const s = evaluateHand([...holeCards, ...communityCards, c]);
+                if (s > bestScore) { bestScore = s; best = c; }
+            }
+            
+            document.getElementById('best-hand-list').innerHTML = best ? 
+                '<div class="best-card">' + best[0] + suitSymbols[best[1]] + ' → ' + getHandName(bestScore) + '</div>' : '';
+        }
+
+        function resetAll() {
+            holeCards = []; communityCards = []; currentPhase = 'preflop';
+            document.getElementById('community-section').classList.add('hidden');
+            document.getElementById('odds-section').classList.add('hidden');
+            document.getElementById('outs-section').classList.add('hidden');
+            document.getElementById('best-hand-section').classList.add('hidden');
+            document.getElementById('reset-btn').classList.add('hidden');
+            document.getElementById('hole-cards-section').classList.remove('hidden');
+            updateDisplay();
+            updatePhaseIndicator();
+        }
+    </script>
+</body>
+</html>
